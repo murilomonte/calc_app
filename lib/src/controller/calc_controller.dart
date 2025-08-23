@@ -5,29 +5,63 @@ class CalcController extends ChangeNotifier {
   String input = '';
   String result = '';
 
-  // parser
-  // addinput
-  // calc -> método principal que vai redirecionar tudo (Talvez seja uma má prática)
+  bool isOperator(String value) {
+    return ['+', '-', '*', '/', '×', '÷', '%'].contains(value);
+  }
 
+  void determine(String value) {
+    if (value == '=') {
+      calc();
+    } else if (value == 'AC') {
+      clear();
+    } else {
+      _addInput(value);
+    }
+  }
+
+  void _addInput(String value) {
+    if (isOperator(value) &&
+        input.isNotEmpty &&
+        isOperator(input[input.length - 1])) {
+      return;
+    }
+    input += value;
+    notifyListeners();
+  }
+
+  void backspace() {
+    if (input.isNotEmpty) {
+      input = input.substring(0, input.length - 1);
+      notifyListeners();
+    }
+  }
+
+  void clear() {
+    input = '';
+    result = '';
+    notifyListeners();
+  }
 
   Expression parser(String exp) {
     try {
       GrammarParser parser = GrammarParser();
-
-      String formatedExpression = exp.replaceAll('×', '*').replaceAll('÷', '/');
+      String formatedExpression = exp
+          .replaceAll('×', '*')
+          .replaceAll(',', '.')
+          .replaceAll('÷', '/')
+          .replaceAll('%', '/100*');
 
       Expression expression = parser.parse(formatedExpression);
+
       return expression;
     } catch (error) {
       throw FormatException('Formato inválido');
     }
   }
 
-  void addInput(String value) {
-    input += value;
-  }
+  void calc() {
+    if (input.isEmpty) return;
 
-  void calc(BuildContext context) {
     try {
       Expression expression = parser(input);
 
@@ -35,16 +69,10 @@ class CalcController extends ChangeNotifier {
       RealEvaluator eval = RealEvaluator(contextModel);
 
       result = eval.evaluate(expression).toString();
-    } on FormatException catch (error) {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.message)));
+      notifyListeners();
     } catch (error) {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.toString())));
+      result = 'Error';
+      rethrow;
     }
   }
 }

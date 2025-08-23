@@ -1,6 +1,7 @@
+import 'package:calc_app/src/controller/calc_controller.dart';
 import 'package:calc_app/src/widget/calc_button.dart';
 import 'package:flutter/material.dart';
-import 'package:math_expressions/math_expressions.dart';
+import 'package:provider/provider.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -10,55 +11,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  String input = '';
-  String result = '';
-
-  Expression parser(String exp) {
-    try {
-      GrammarParser parser = GrammarParser();
-
-      String formatedExpression = exp
-          .replaceAll('×', '*')
-          .replaceAll(',', '.')
-          .replaceAll('÷', '/')
-          .replaceAll('%', '/100*');
-
-      Expression expression = parser.parse(formatedExpression);
-      return expression;
-    } catch (error) {
-      throw FormatException('Formato inválido');
-    }
-  }
-
-  void addInput(String value) {
-    setState(() {
-      input += value;
-    });
-  }
-
-  void calc(BuildContext context) {
-    try {
-      Expression expression = parser(input);
-
-      ContextModel contextModel = ContextModel();
-      RealEvaluator eval = RealEvaluator(contextModel);
-
-      setState(() {
-        result = eval.evaluate(expression).toString();
-      });
-    } on FormatException catch (error) {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.message)));
-    } catch (error) {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.toString())));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,14 +38,14 @@ class _HomeState extends State<Home> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        input,
+                        context.watch<CalcController>().input,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.secondary,
                           fontSize: 30,
                         ),
                       ),
                       Text(
-                        result,
+                        context.watch<CalcController>().result,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
                           fontSize: 60,
@@ -103,16 +55,10 @@ class _HomeState extends State<Home> {
                   ),
                   IconButton(
                     onLongPress: () {
-                      setState(() {
-                        result = '';
-                        input = '';
-                      });
+                      context.read<CalcController>().clear();
                     },
                     onPressed: () {
-                      setState(() {
-                        result = '';
-                        input = input.substring(0, input.length - 1);
-                      });
+                      context.read<CalcController>().backspace();
                     },
                     icon: Icon(Icons.backspace_outlined),
                   ),
@@ -152,17 +98,13 @@ class _HomeState extends State<Home> {
                       isNumber: double.tryParse(e) != null,
                       value: e,
                       onPressed: (value) {
-                        if (e == '=') {
-                          calc(context);
-                        } else if (e == 'AC') {
-                          setState(() {
-                            input = '';
-                            result = '';
-                          });
-                        } else {
-                          setState(() {
-                            input += value;
-                          });
+                        try {
+                          context.read<CalcController>().determine(value);
+                        } on FormatException catch (error) {
+                          ScaffoldMessenger.of(context).clearSnackBars();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(error.message)),
+                          );
                         }
                       },
                     );
