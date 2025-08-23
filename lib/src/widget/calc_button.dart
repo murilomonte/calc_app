@@ -13,31 +13,28 @@ class CalcButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      customBorder: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(80),
-      ),
-      onTap: () => onPressed(value),
-      child: Padding(
-        padding: const EdgeInsets.all(5.0),
-        child: Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            color: isNumber
+    return Padding(
+      padding: const EdgeInsets.all(5.0),
+      child: ElevatedButton(
+        style: ButtonStyle(
+          elevation: WidgetStatePropertyAll(0),
+          backgroundColor: WidgetStatePropertyAll(
+            isNumber
                 ? Theme.of(context).colorScheme.surfaceContainer
                 : Theme.of(context).colorScheme.surfaceTint,
-            borderRadius: BorderRadius.circular(80),
           ),
-          child: Center(
-            child: Text(
-              value,
-              style: TextStyle(
-                color: isNumber
-                    ? Theme.of(context).colorScheme.secondary
-                    : Theme.of(context).colorScheme.onSecondary,
-                fontSize: 30
-              ),
+          
+        ),
+        onPressed: () => onPressed(value),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            value,
+            style: TextStyle(
+              color: isNumber
+                  ? Theme.of(context).colorScheme.secondary
+                  : Theme.of(context).colorScheme.onSecondary,
+              fontSize: 30,
             ),
           ),
         ),
