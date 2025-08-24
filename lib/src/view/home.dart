@@ -37,18 +37,24 @@ class _HomeState extends State<Home> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text(
-                        context.watch<CalcController>().input,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.secondary,
-                          fontSize: 30,
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          context.watch<CalcController>().input,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.secondary,
+                            fontSize: 30,
+                          ),
                         ),
                       ),
-                      Text(
-                        context.watch<CalcController>().result,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontSize: 60,
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          context.watch<CalcController>().result,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontSize: 60,
+                          ),
                         ),
                       ),
                     ],
